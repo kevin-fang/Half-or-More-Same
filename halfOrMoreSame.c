@@ -6,24 +6,45 @@
 struct account {};
 typedef struct account *Card;
 
-Card getMostCardAppearances(Card *cards, int size) {
+struct commonCard {
+	Card card;
+	int numOccurences;
+};
+
+typedef struct commonCard *CommonCard;
+
+CommonCard getMostCardAppearances(Card *cards, int size) {
+	if (size == 1) {
+		CommonCard mostAppeared = malloc(sizeof(struct commonCard));
+		mostAppeared->card = cards[0];
+		mostAppeared->numOccurences = 1;
+		return mostAppeared;
+	}
+
 	Card *firstHalf = malloc(sizeof(Card) * size / 2);
 	Card *secondHalf = malloc(sizeof(Card) * (size - size / 2));
 	memcpy(firstHalf, cards, size / 2);
 	memcpy(secondHalf, cards, size - size / 2);
-	Card mostInFirst = getMostCardAppearances(firstHalf, size / 2);
-	Card mostInSecond = getMostCardAppearances(secondHalf, size - size / 2);
-
+	CommonCard mostInFirst = getMostCardAppearances(firstHalf, size / 2);
+	CommonCard mostInSecond = getMostCardAppearances(secondHalf, size - size / 2);
+	CommonCard toReturn = mostInFirst->numOccurences > mostInSecond->numOccurences ? mostInFirst : mostInSecond;
+	for (int i = 0; i < size; i++) {
+		if (toReturn->card == cards[i]) {
+			toReturn->numOccurences++;
+		}
+	}
+	return toReturn;
 }
 
 bool halfOrMoreSame(Card *cards, int size) {
-	Card mostAppeared = getMostCardAppearances(cards, size);
+	CommonCard mostAppeared = getMostCardAppearances(cards, size);
 	int numEquals = 0;
 	for (int i = 0; i < size; i++) {
-		if (cards[i] == mostAppeared) {
+		if (cards[i] == mostAppeared->card) {
 			numEquals++;
 		}
 	}
+	printf("%d\n", numEquals);
 	if (numEquals >= size / 2) {
 		return true;
 	}
